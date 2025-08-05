@@ -6,6 +6,7 @@ import 'providers/user_provider.dart';
 import 'providers/auto_match_provider.dart';
 import 'providers/chat_provider.dart';
 import 'providers/dashboard_provider.dart';
+import 'providers/contract_provider.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
@@ -14,8 +15,11 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/campaign/campaign_list_screen.dart';
 import 'screens/campaign/campaign_create_screen.dart';
 import 'screens/matching/auto_match_screen.dart';
-import 'screens/chat/chat_list_screen.dart';
-import 'screens/chat/chat_screen.dart';
+import './screens/chat/chat_list_screen.dart';
+import './screens/chat/chat_screen.dart';
+import './screens/contract/contract_list_screen.dart';
+import './screens/contract/contract_create_screen.dart';
+import './screens/payment/payment_screen.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -34,6 +38,7 @@ class SellerSurfLinkApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AutoMatchProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
+        ChangeNotifierProvider(create: (_) => ContractProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -89,10 +94,36 @@ final GoRouter _router = GoRouter(
       builder: (context, state) => const ChatListScreen(),
     ),
     GoRoute(
-      path: '/chat/:roomId',
+      path: '/chat/:chatId',
       builder: (context, state) {
-        final roomId = state.pathParameters['roomId']!;
-        return ChatScreen(roomId: roomId);
+        final chatId = state.pathParameters['chatId']!;
+        return ChatScreen(roomId: chatId);
+      },
+    ),
+    GoRoute(
+      path: '/contracts',
+      builder: (context, state) => const ContractListScreen(),
+    ),
+    GoRoute(
+      path: '/contract/create',
+      builder: (context, state) {
+        final campaignId = state.uri.queryParameters['campaignId'] ?? '';
+        final campaignName = state.uri.queryParameters['campaignName'] ?? '';
+        final influencerId = state.uri.queryParameters['influencerId'] ?? '';
+        final influencerName = state.uri.queryParameters['influencerName'] ?? '';
+        return ContractCreateScreen(
+          campaignId: campaignId,
+          campaignName: campaignName,
+          influencerId: influencerId,
+          influencerName: influencerName,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/payment/:contractId',
+      builder: (context, state) {
+        final contractId = state.pathParameters['contractId']!;
+        return PaymentScreen(contractId: contractId);
       },
     ),
   ],

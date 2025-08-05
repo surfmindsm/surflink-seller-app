@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_model.dart';
@@ -45,67 +45,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> pages = [
       _HomeTab(user: user),
-      _SearchTab(),
+      _ContractTab(),
       _ChatTab(),
       _ProfileTab(user: user),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.connect_without_contact,
-              color: AppTheme.primaryColor,
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const Icon(
+                Icons.connect_without_contact,
+                color: AppTheme.primaryColor,
+              ),
+              const SizedBox(width: 8),
+              const Text('셀러셀러'),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined),
+                onPressed: () {
+                  // TODO: 알림 화면 구현
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('알림 기능은 준비 중입니다.')),
+                  );
+                },
+              ),
+            ],
+          ),
+          automaticallyImplyLeading: false,
+          bottom: TabBar(
+            tabs: [
+              Tab(icon: Icon(Icons.home), text: '홈'),
+              Tab(icon: Icon(Icons.description), text: '계약'),
+              Tab(icon: Icon(Icons.chat), text: '채팅'),
+              Tab(icon: Icon(Icons.person), text: '프로필'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: pages,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: AppTheme.primaryColor,
+          unselectedItemColor: AppTheme.grey400,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home),
+              label: '홈',
             ),
-            const SizedBox(width: 8),
-            const Text('셀러셀러'),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.notifications_outlined),
-              onPressed: () {
-                // TODO: 알림 화면 구현
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('알림 기능은 준비 중입니다.')),
-                );
-              },
+            BottomNavigationBarItem(
+              icon: Icon(Icons.description),
+              activeIcon: Icon(Icons.description),
+              label: '계약',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_outlined),
+              activeIcon: Icon(Icons.chat),
+              label: '채팅',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outlined),
+              activeIcon: Icon(Icons.person),
+              label: '프로필',
             ),
           ],
         ),
-        automaticallyImplyLeading: false,
-      ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: pages,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.primaryColor,
-        unselectedItemColor: AppTheme.grey400,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: '검색',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_outlined),
-            activeIcon: Icon(Icons.chat),
-            label: '채팅',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outlined),
-            activeIcon: Icon(Icons.person),
-            label: '프로필',
-          ),
-        ],
       ),
     );
   }
@@ -203,7 +213,7 @@ class _HomeTabState extends State<_HomeTab> {
                     Expanded(
                       child: _QuickMenuCard(
                         icon: Icons.campaign,
-                        title: user?.type == UserType.seller 
+                        title: widget.user?.type == UserType.seller 
                             ? '캠페인 등록'
                             : '캠페인 찾기',
                         onTap: () {
@@ -215,7 +225,7 @@ class _HomeTabState extends State<_HomeTab> {
                     Expanded(
                       child: _QuickMenuCard(
                         icon: Icons.people,
-                        title: user?.type == UserType.seller 
+                        title: widget.user?.type == UserType.seller 
                             ? '인플루언서 검색'
                             : '프로필 관리',
                         onTap: () {
@@ -227,7 +237,7 @@ class _HomeTabState extends State<_HomeTab> {
                 ),
                 
                 // 자동매칭 (판매사 전용)
-                if (user?.type == UserType.seller) ...[
+                if (widget.user?.type == UserType.seller) ...[
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
@@ -299,7 +309,7 @@ class _HomeTabState extends State<_HomeTab> {
                     ),
                   ),
                 
-                if (user?.type == UserType.seller) ...[
+                if (widget.user?.type == UserType.seller) ...[
                   const SizedBox(height: 24),
                   
                   // 인플루언서 추천
@@ -419,13 +429,48 @@ class _QuickMenuCard extends StatelessWidget {
   }
 }
 
-class _SearchTab extends StatelessWidget {
+class _ContractTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        '검색 기능은 준비 중입니다.',
-        style: TextStyle(fontSize: 16),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.description_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '계약 관리',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '내 계약을 확인하고 관리하세요',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => context.push('/contracts'),
+            icon: const Icon(Icons.description),
+            label: const Text('계약 목록 보기'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
