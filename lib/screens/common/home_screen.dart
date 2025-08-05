@@ -63,6 +63,12 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               const Text('셀러셀러'),
               const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  context.push('/search?targetType=campaign');
+                },
+              ),
               Consumer<NotificationProvider>(
                 builder: (context, notificationProvider, child) {
                   return Stack(

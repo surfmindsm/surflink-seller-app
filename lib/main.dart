@@ -9,7 +9,9 @@ import 'providers/dashboard_provider.dart';
 import 'providers/contract_provider.dart';
 import 'providers/review_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/search_filter_provider.dart';
 import 'models/review_model.dart';
+import 'models/search_filter_model.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
@@ -26,6 +28,9 @@ import './screens/payment/payment_screen.dart';
 import './screens/review/review_write_screen.dart';
 import './screens/review/review_list_screen.dart';
 import './screens/notification/notification_list_screen.dart';
+import './screens/search/advanced_search_screen.dart';
+import './screens/search/filter_settings_screen.dart';
+import './screens/search/search_results_screen.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -47,6 +52,7 @@ class SellerSurfLinkApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ContractProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
         ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => SearchFilterProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -163,6 +169,44 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/notifications',
       builder: (context, state) => const NotificationListScreen(),
+    ),
+    // 검색 관련 라우트
+    GoRoute(
+      path: '/search',
+      builder: (context, state) {
+        final targetTypeStr = state.uri.queryParameters['targetType'] ?? 'campaign';
+        final initialKeyword = state.uri.queryParameters['keyword'];
+        final targetType = SearchTargetType.values.firstWhere(
+          (type) => type.name == targetTypeStr,
+          orElse: () => SearchTargetType.campaign,
+        );
+        return AdvancedSearchScreen(
+          targetType: targetType,
+          initialKeyword: initialKeyword,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/search/filter-settings',
+      builder: (context, state) {
+        final targetTypeStr = state.uri.queryParameters['targetType'] ?? 'campaign';
+        final targetType = SearchTargetType.values.firstWhere(
+          (type) => type.name == targetTypeStr,
+          orElse: () => SearchTargetType.campaign,
+        );
+        return FilterSettingsScreen(targetType: targetType);
+      },
+    ),
+    GoRoute(
+      path: '/search/results',
+      builder: (context, state) {
+        final targetTypeStr = state.uri.queryParameters['targetType'] ?? 'campaign';
+        final targetType = SearchTargetType.values.firstWhere(
+          (type) => type.name == targetTypeStr,
+          orElse: () => SearchTargetType.campaign,
+        );
+        return SearchResultsScreen(targetType: targetType);
+      },
     ),
   ],
 );
