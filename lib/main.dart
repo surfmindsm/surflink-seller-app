@@ -7,6 +7,9 @@ import 'providers/auto_match_provider.dart';
 import 'providers/chat_provider.dart';
 import 'providers/dashboard_provider.dart';
 import 'providers/contract_provider.dart';
+import 'providers/review_provider.dart';
+import 'providers/notification_provider.dart';
+import 'models/review_model.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
@@ -20,6 +23,9 @@ import './screens/chat/chat_screen.dart';
 import './screens/contract/contract_list_screen.dart';
 import './screens/contract/contract_create_screen.dart';
 import './screens/payment/payment_screen.dart';
+import './screens/review/review_write_screen.dart';
+import './screens/review/review_list_screen.dart';
+import './screens/notification/notification_list_screen.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -39,6 +45,8 @@ class SellerSurfLinkApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ChatProvider()),
         ChangeNotifierProvider(create: (_) => DashboardProvider()),
         ChangeNotifierProvider(create: (_) => ContractProvider()),
+        ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -125,6 +133,36 @@ final GoRouter _router = GoRouter(
         final contractId = state.pathParameters['contractId']!;
         return PaymentScreen(contractId: contractId);
       },
+    ),
+    // 리뷰 관련 라우트
+    GoRoute(
+      path: '/review/list',
+      builder: (context, state) => const ReviewListScreen(),
+    ),
+    GoRoute(
+      path: '/review/write',
+      builder: (context, state) {
+        final contractId = state.uri.queryParameters['contractId'] ?? '';
+        final campaignName = state.uri.queryParameters['campaignName'] ?? '';
+        final partnerId = state.uri.queryParameters['partnerId'] ?? '';
+        final partnerName = state.uri.queryParameters['partnerName'] ?? '';
+        final reviewTypeStr = state.uri.queryParameters['reviewType'] ?? 'influencer';
+        final existingReviewId = state.uri.queryParameters['existingReviewId'];
+        
+        return ReviewWriteScreen(
+          contractId: contractId,
+          campaignName: campaignName,
+          partnerId: partnerId,
+          partnerName: partnerName,
+          reviewType: reviewTypeStr == 'seller' ? ReviewType.sellerToInfluencer : ReviewType.influencerToSeller,
+          existingReviewId: existingReviewId,
+        );
+      },
+    ),
+    // 알림 관련 라우트
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationListScreen(),
     ),
   ],
 );

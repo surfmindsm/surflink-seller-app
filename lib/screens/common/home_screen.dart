@@ -4,10 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_model.dart';
-import '../../utils/theme.dart';
 import '../../providers/dashboard_provider.dart';
-import '../../widgets/dashboard/stats_card.dart';
-import '../../widgets/dashboard/chart_widgets.dart';
+import '../../providers/notification_provider.dart';
+import '../../utils/theme.dart';
 import '../../widgets/campaign_card.dart';
 import '../../widgets/influencer_card.dart';
 
@@ -46,12 +45,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final List<Widget> pages = [
       _HomeTab(user: user),
       _ContractTab(),
+      _ReviewTab(),
       _ChatTab(),
       _ProfileTab(user: user),
     ];
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: AppBar(
           title: Row(
@@ -63,12 +63,42 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 8),
               const Text('셀러셀러'),
               const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // TODO: 알림 화면 구현
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('알림 기능은 준비 중입니다.')),
+              Consumer<NotificationProvider>(
+                builder: (context, notificationProvider, child) {
+                  return Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined),
+                        onPressed: () {
+                          context.push('/notifications');
+                        },
+                      ),
+                      if (notificationProvider.unreadCount > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              '${notificationProvider.unreadCount}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
               ),
@@ -79,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
             tabs: [
               Tab(icon: Icon(Icons.home), text: '홈'),
               Tab(icon: Icon(Icons.description), text: '계약'),
+              Tab(icon: Icon(Icons.star), text: '리뷰'),
               Tab(icon: Icon(Icons.chat), text: '채팅'),
               Tab(icon: Icon(Icons.person), text: '프로필'),
             ],
@@ -103,6 +134,11 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.description),
               activeIcon: Icon(Icons.description),
               label: '계약',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.star_outline),
+              activeIcon: Icon(Icons.star),
+              label: '리뷰',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.chat_outlined),
@@ -463,6 +499,53 @@ class _ContractTab extends StatelessWidget {
             onPressed: () => context.push('/contracts'),
             icon: const Icon(Icons.description),
             label: const Text('계약 목록 보기'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewTab extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.star_outline,
+            size: 64,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '리뷰 관리',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '받은 리뷰와 작성한 리뷰를 확인하세요',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          ElevatedButton.icon(
+            onPressed: () => context.push('/review/list'),
+            icon: const Icon(Icons.star),
+            label: const Text('리뷰 목록 보기'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(
                 horizontal: 24,
