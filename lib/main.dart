@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/auto_match_provider.dart';
+import 'providers/chat_provider.dart';
 import 'screens/auth/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
@@ -12,6 +13,8 @@ import 'screens/profile/profile_screen.dart';
 import 'screens/campaign/campaign_list_screen.dart';
 import 'screens/campaign/campaign_create_screen.dart';
 import 'screens/matching/auto_match_screen.dart';
+import 'screens/chat/chat_list_screen.dart';
+import 'screens/chat/chat_screen.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -28,6 +31,7 @@ class SellerSurfLinkApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AutoMatchProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, _) {
@@ -77,6 +81,17 @@ final GoRouter _router = GoRouter(
     GoRoute(
       path: '/campaign/create',
       builder: (context, state) => const CampaignCreateScreen(),
+    ),
+    GoRoute(
+      path: '/chat',
+      builder: (context, state) => const ChatListScreen(),
+    ),
+    GoRoute(
+      path: '/chat/:roomId',
+      builder: (context, state) {
+        final roomId = state.pathParameters['roomId']!;
+        return ChatScreen(roomId: roomId);
+      },
     ),
   ],
 );

@@ -410,10 +410,40 @@ class _SearchTab extends StatelessWidget {
 class _ChatTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        '채팅 기능은 준비 중입니다.',
-        style: TextStyle(fontSize: 16),
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 64,
+            color: Colors.grey[300],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '채팅',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '인플루언서와 실시간으로 소통하세요',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () {
+              context.push('/chat');
+            },
+            icon: const Icon(Icons.chat),
+            label: const Text('채팅 목록 보기'),
+          ),
+        ],
       ),
     );
   }
