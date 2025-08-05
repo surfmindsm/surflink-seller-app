@@ -5,6 +5,9 @@ import '../../providers/auth_provider.dart';
 import '../../providers/user_provider.dart';
 import '../../models/user_model.dart';
 import '../../utils/theme.dart';
+import '../../providers/dashboard_provider.dart';
+import '../../widgets/dashboard/stats_card.dart';
+import '../../widgets/dashboard/chart_widgets.dart';
 import '../../widgets/campaign_card.dart';
 import '../../widgets/influencer_card.dart';
 
@@ -108,19 +111,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _HomeTab extends StatelessWidget {
+class _HomeTab extends StatefulWidget {
   final User? user;
 
   const _HomeTab({this.user});
 
   @override
+  State<_HomeTab> createState() => _HomeTabState();
+}
+
+class _HomeTabState extends State<_HomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  void _loadDashboardData() {
+    if (widget.user != null) {
+      final dashboardProvider = Provider.of<DashboardProvider>(context, listen: false);
+      dashboardProvider.loadAllDashboardData(widget.user!.id, widget.user!.type);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, child) {
+    return Consumer2<UserProvider, DashboardProvider>(
+      builder: (context, userProvider, dashboardProvider, child) {
         return RefreshIndicator(
           onRefresh: () async {
             await userProvider.loadCampaigns();
             await userProvider.loadInfluencers();
+            if (widget.user != null) {
+              await dashboardProvider.refresh(widget.user!.id, widget.user!.type);
+            }
           },
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -137,7 +161,7 @@ class _HomeTab extends StatelessWidget {
                           radius: 30,
                           backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
                           child: Text(
-                            user?.name.substring(0, 1) ?? 'U',
+                            widget.user?.name.substring(0, 1) ?? 'U',
                             style: const TextStyle(
                               color: AppTheme.primaryColor,
                               fontSize: 24,
@@ -151,12 +175,12 @@ class _HomeTab extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${user?.name ?? '사용자'}님, 안녕하세요!',
+                                '${widget.user?.name ?? '사용자'}님, 안녕하세요!',
                                 style: Theme.of(context).textTheme.headlineSmall,
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                user?.type == UserType.seller 
+                                widget.user?.type == UserType.seller 
                                     ? '새로운 인플루언서를 찾아보세요'
                                     : '새로운 캠페인에 참여해보세요',
                                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(

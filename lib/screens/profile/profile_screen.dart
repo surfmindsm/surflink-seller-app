@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user_model.dart';
 import '../../utils/theme.dart';
+import '../../widgets/profile/portfolio_section.dart';
+import '../../widgets/profile/sns_section.dart';
+import '../../widgets/profile/sns_section.dart' show SnsAccountFormModal;
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -108,6 +111,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       context.go('/login');
     }
+  }
+
+  // 포트폴리오 관련 메서드
+  void _showPortfolioForm({PortfolioItem? item}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(item == null ? '포트폴리오 추가 기능은 곧 구현됩니다' : '포트폴리오 편집 기능은 곧 구현됩니다'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _deletePortfolioItem(PortfolioItem item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('포트폴리오 삭제'),
+        content: Text('${item.title}을(를) 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('포트폴리오가 삭제되었습니다')),
+              );
+            },
+            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SNS 관련 메서드
+  void _showSnsForm({SnsAccount? account}) {
+    showDialog(
+      context: context,
+      builder: (context) => SnsAccountFormModal(
+        account: account,
+        onSave: (newAccount) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(account == null 
+                  ? 'SNS 계정이 추가되었습니다' 
+                  : 'SNS 계정이 수정되었습니다'),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _deleteSnsAccount(SnsAccount account) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('SNS 계정 삭제'),
+        content: Text('${account.displayName} 계정을 삭제하시겠습니까?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('SNS 계정이 삭제되었습니다')),
+              );
+            },
+            child: const Text('삭제', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -368,6 +450,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ],
 
               const SizedBox(height: 32),
+
+              // 인플루언서 전용 섹션
+              if (user?.type == UserType.influencer) ...[
+                PortfolioSection(
+                  portfolioItems: user?.portfolio,
+                  onAddPortfolio: () => _showPortfolioForm(),
+                  onEditPortfolio: (item) => _showPortfolioForm(item: item),
+                  onDeletePortfolio: (item) => _deletePortfolioItem(item),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                SnsSection(
+                  snsAccounts: user?.snsLinks,
+                  onAddSns: () => _showSnsForm(),
+                  onEditSns: (account) => _showSnsForm(account: account),
+                  onDeleteSns: (account) => _deleteSnsAccount(account),
+                ),
+                
+                const SizedBox(height: 32),
+              ],
 
               // 저장 버튼
               SizedBox(

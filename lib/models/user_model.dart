@@ -2,6 +2,116 @@ enum UserType { influencer, seller }
 
 enum UserStatus { active, inactive, suspended }
 
+enum SnsType { instagram, youtube, tiktok, facebook, twitter, blog, other }
+
+class PortfolioItem {
+  final String id;
+  final String title;
+  final String? description;
+  final String imageUrl;
+  final String? videoUrl;
+  final String? linkUrl;
+  final DateTime createdAt;
+  final List<String> tags;
+
+  PortfolioItem({
+    required this.id,
+    required this.title,
+    this.description,
+    required this.imageUrl,
+    this.videoUrl,
+    this.linkUrl,
+    required this.createdAt,
+    this.tags = const [],
+  });
+
+  factory PortfolioItem.fromJson(Map<String, dynamic> json) => PortfolioItem(
+        id: json['id'],
+        title: json['title'],
+        description: json['description'],
+        imageUrl: json['imageUrl'],
+        videoUrl: json['videoUrl'],
+        linkUrl: json['linkUrl'],
+        createdAt: DateTime.parse(json['createdAt']),
+        tags: List<String>.from(json['tags'] ?? []),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'imageUrl': imageUrl,
+        'videoUrl': videoUrl,
+        'linkUrl': linkUrl,
+        'createdAt': createdAt.toIso8601String(),
+        'tags': tags,
+      };
+}
+
+class SnsAccount {
+  final String id;
+  final SnsType type;
+  final String username;
+  final String url;
+  final int? followersCount;
+  final bool isVerified;
+  final DateTime? verifiedAt;
+
+  SnsAccount({
+    required this.id,
+    required this.type,
+    required this.username,
+    required this.url,
+    this.followersCount,
+    this.isVerified = false,
+    this.verifiedAt,
+  });
+
+  String get displayName {
+    switch (type) {
+      case SnsType.instagram:
+        return 'Instagram';
+      case SnsType.youtube:
+        return 'YouTube';
+      case SnsType.tiktok:
+        return 'TikTok';
+      case SnsType.facebook:
+        return 'Facebook';
+      case SnsType.twitter:
+        return 'Twitter';
+      case SnsType.blog:
+        return 'Blog';
+      case SnsType.other:
+        return 'Other';
+    }
+  }
+
+  factory SnsAccount.fromJson(Map<String, dynamic> json) => SnsAccount(
+        id: json['id'],
+        type: SnsType.values.firstWhere(
+          (e) => e.toString() == 'SnsType.${json['type']}',
+          orElse: () => SnsType.other,
+        ),
+        username: json['username'],
+        url: json['url'],
+        followersCount: json['followersCount'],
+        isVerified: json['isVerified'] ?? false,
+        verifiedAt: json['verifiedAt'] != null
+            ? DateTime.parse(json['verifiedAt'])
+            : null,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'type': type.name,
+        'username': username,
+        'url': url,
+        'followersCount': followersCount,
+        'isVerified': isVerified,
+        'verifiedAt': verifiedAt?.toIso8601String(),
+      };
+}
+
 class User {
   final String id;
   final String email;
@@ -23,7 +133,8 @@ class User {
   final String? pricePolicy;
   final int? priceAmount;
   final List<String>? availableTime;
-  final List<String>? portfolio;
+  final List<PortfolioItem>? portfolio;
+  final List<SnsAccount>? snsLinks;
   
   // 판매사 전용 필드
   final String? company;
@@ -61,6 +172,7 @@ class User {
     this.priceAmount,
     this.availableTime,
     this.portfolio,
+    this.snsLinks,
     
     // 판매사 필드
     this.company,
@@ -98,7 +210,16 @@ class User {
       pricePolicy: json['price_policy'],
       priceAmount: json['price_amount'],
       availableTime: json['available_time']?.cast<String>(),
-      portfolio: json['portfolio']?.cast<String>(),
+      portfolio: json['portfolio'] != null
+          ? (json['portfolio'] as List)
+              .map((item) => PortfolioItem.fromJson(item))
+              .toList()
+          : null,
+      snsLinks: json['sns_links'] != null
+          ? (json['sns_links'] as List)
+              .map((item) => SnsAccount.fromJson(item))
+              .toList()
+          : null,
       
       company: json['company'],
       manager: json['manager'],
@@ -135,7 +256,8 @@ class User {
       'price_policy': pricePolicy,
       'price_amount': priceAmount,
       'available_time': availableTime,
-      'portfolio': portfolio,
+      'portfolio': portfolio?.map((item) => item.toJson()).toList(),
+      'sns_links': snsLinks?.map((item) => item.toJson()).toList(),
       
       'company': company,
       'manager': manager,
@@ -170,7 +292,8 @@ class User {
     String? pricePolicy,
     int? priceAmount,
     List<String>? availableTime,
-    List<String>? portfolio,
+    List<PortfolioItem>? portfolio,
+    List<SnsAccount>? snsLinks,
     String? company,
     String? manager,
     String? businessFile,
@@ -202,6 +325,7 @@ class User {
       priceAmount: priceAmount ?? this.priceAmount,
       availableTime: availableTime ?? this.availableTime,
       portfolio: portfolio ?? this.portfolio,
+      snsLinks: snsLinks ?? this.snsLinks,
       company: company ?? this.company,
       manager: manager ?? this.manager,
       businessFile: businessFile ?? this.businessFile,
