@@ -61,6 +61,54 @@ class ChatService {
         updatedAt: DateTime.now().subtract(Duration(minutes: 30)),
         unreadCount: 0,
       ),
+      ChatRoom(
+        id: 'room_3',
+        name: '패션스타일리스트와의 채팅',
+        participantIds: [currentUserId, 'inf_3'],
+        participantNames: {
+          currentUserId: '판매사',
+          'inf_3': '패션스타일리스트',
+        },
+        participantImages: {
+          currentUserId: null,
+          'inf_3': 'https://picsum.photos/200/200?random=3',
+        },
+        createdAt: DateTime.now().subtract(Duration(days: 5)),
+        updatedAt: DateTime.now().subtract(Duration(hours: 6)),
+        unreadCount: 1,
+      ),
+      ChatRoom(
+        id: 'room_4',
+        name: '게임 리뷰어와의 채팅',
+        participantIds: [currentUserId, 'inf_4'],
+        participantNames: {
+          currentUserId: '판매사',
+          'inf_4': '게임 리뷰어',
+        },
+        participantImages: {
+          currentUserId: null,
+          'inf_4': 'https://picsum.photos/200/200?random=4',
+        },
+        createdAt: DateTime.now().subtract(Duration(hours: 8)),
+        updatedAt: DateTime.now().subtract(Duration(minutes: 15)),
+        unreadCount: 3,
+      ),
+      ChatRoom(
+        id: 'room_5',
+        name: '육아인플루언서와의 채팅',
+        participantIds: [currentUserId, 'inf_5'],
+        participantNames: {
+          currentUserId: '판매사',
+          'inf_5': '육아인플루언서',
+        },
+        participantImages: {
+          currentUserId: null,
+          'inf_5': 'https://picsum.photos/200/200?random=5',
+        },
+        createdAt: DateTime.now().subtract(Duration(days: 2)),
+        updatedAt: DateTime.now().subtract(Duration(hours: 12)),
+        unreadCount: 0,
+      ),
     ];
 
     // 목업 메시지들

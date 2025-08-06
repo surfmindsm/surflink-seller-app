@@ -205,9 +205,65 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => context.pop(),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _logout,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings),
+            onSelected: (value) {
+              switch (value) {
+                case 'security':
+                  context.push('/security-settings');
+                  break;
+                case 'notifications':
+                  // TODO: 알림 설정 화면으로 이동
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('알림 설정 기능은 개발 중입니다')),
+                  );
+                  break;
+                case 'admin':
+                  if (user?.email == 'admin@sellerseller.com') {
+                    context.push('/admin');
+                  }
+                  break;
+                case 'logout':
+                  _logout();
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'security',
+                child: ListTile(
+                  leading: Icon(Icons.security),
+                  title: Text('보안 설정'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'notifications',
+                child: ListTile(
+                  leading: Icon(Icons.notifications),
+                  title: Text('알림 설정'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              if (user?.email == 'admin@sellerseller.com')
+                const PopupMenuItem(
+                  value: 'admin',
+                  child: ListTile(
+                    leading: Icon(Icons.admin_panel_settings, color: Colors.orange),
+                    title: Text('관리자 대시보드', style: TextStyle(color: Colors.orange)),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: Colors.red),
+                  title: Text('로그아웃', style: TextStyle(color: Colors.red)),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
           ),
         ],
       ),
