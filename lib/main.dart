@@ -31,6 +31,8 @@ import './screens/notification/notification_list_screen.dart';
 import './screens/search/advanced_search_screen.dart';
 import './screens/search/filter_settings_screen.dart';
 import './screens/search/search_results_screen.dart';
+import './screens/settings/security_settings_screen.dart';
+import './screens/admin/admin_dashboard_screen.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -207,6 +209,16 @@ final GoRouter _router = GoRouter(
         );
         return SearchResultsScreen(targetType: targetType);
       },
+    ),
+    // 설정 관련 라우트
+    GoRoute(
+      path: '/security-settings',
+      builder: (context, state) => const SecuritySettingsScreen(),
+    ),
+    // 관리자 관련 라우트
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminDashboardScreen(),
     ),
   ],
 );

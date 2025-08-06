@@ -9,6 +9,10 @@ import '../../providers/notification_provider.dart';
 import '../../utils/theme.dart';
 import '../../widgets/campaign_card.dart';
 import '../../widgets/influencer_card.dart';
+import '../contract/contract_list_screen.dart';
+import '../review/review_list_screen.dart';
+import '../chat/chat_list_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,10 +48,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final List<Widget> pages = [
       _HomeTab(user: user),
-      _ContractTab(),
-      _ReviewTab(),
-      _ChatTab(),
-      _ProfileTab(user: user),
+      const ContractListScreen(),
+      const ReviewListScreen(),
+      const ChatListScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -172,6 +176,64 @@ class _HomeTabState extends State<_HomeTab> {
     }
   }
 
+  // 활동 타입별 색상 반환
+  Color _getActivityColor(String type) {
+    switch (type) {
+      case 'campaign':
+        return Colors.blue;
+      case 'match':
+        return Colors.green;
+      case 'application':
+        return Colors.orange;
+      case 'review':
+        return Colors.purple;
+      case 'chat':
+        return Colors.teal;
+      case 'contract':
+        return Colors.indigo;
+      default:
+        return AppTheme.grey500;
+    }
+  }
+
+  // 활동 타입별 아이콘 반환
+  IconData _getActivityIcon(String type) {
+    switch (type) {
+      case 'campaign':
+        return Icons.campaign;
+      case 'match':
+        return Icons.people;
+      case 'application':
+        return Icons.assignment;
+      case 'review':
+        return Icons.star;
+      case 'chat':
+        return Icons.chat;
+      case 'contract':
+        return Icons.description;
+      default:
+        return Icons.info;
+    }
+  }
+
+  // 활동 시간 포맷팅
+  String _formatActivityTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+    
+    if (difference.inMinutes < 1) {
+      return '방금 전';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes}분 전';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}일 전';
+    } else {
+      return '${dateTime.month}/${dateTime.day}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<UserProvider, DashboardProvider>(
@@ -189,48 +251,242 @@ class _HomeTabState extends State<_HomeTab> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 환영 메시지
+                // 환영 메시지 & 간단 통계
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(20),
-                    child: Row(
+                    child: Column(
                       children: [
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-                          child: Text(
-                            widget.user?.name.substring(0, 1) ?? 'U',
-                            style: const TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${widget.user?.name ?? '사용자'}님, 안녕하세요!',
-                                style: Theme.of(context).textTheme.headlineSmall,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                widget.user?.type == UserType.seller 
-                                    ? '새로운 인플루언서를 찾아보세요'
-                                    : '새로운 캠페인에 참여해보세요',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppTheme.grey600,
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 30,
+                              backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                              child: Text(
+                                widget.user?.name.substring(0, 1) ?? 'U',
+                                style: const TextStyle(
+                                  color: AppTheme.primaryColor,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${widget.user?.name ?? '사용자'}님, 안녕하세요!',
+                                    style: Theme.of(context).textTheme.headlineSmall,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    widget.user?.type == UserType.seller 
+                                        ? '새로운 인플루언서를 찾아보세요'
+                                        : '새로운 캠페인에 참여해보세요',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: AppTheme.grey600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // 간단 통계
+                        Consumer<DashboardProvider>(
+                          builder: (context, dashboardProvider, child) {
+                            if (widget.user == null || dashboardProvider.isLoadingStats) {
+                              return const SizedBox.shrink();
+                            }
+                            final stats = dashboardProvider.stats;
+                            if (stats == null) {
+                              return const SizedBox.shrink();
+                            }
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  _StatItem(
+                                    label: '이번 달',
+                                    value: stats.thisMonthEarnings > 0 
+                                        ? '${(stats.thisMonthEarnings / 10000).toStringAsFixed(0)}만원'
+                                        : '${stats.totalCampaigns}개',
+                                    icon: widget.user?.type == UserType.seller 
+                                        ? Icons.campaign
+                                        : Icons.work,
+                                  ),
+                                  _StatItem(
+                                    label: '진행 중',
+                                    value: '${stats.activeCampaigns}개',
+                                    icon: Icons.trending_up,
+                                  ),
+                                  _StatItem(
+                                    label: '평점',
+                                    value: stats.averageRating > 0 
+                                        ? '${stats.averageRating.toStringAsFixed(1)}점'
+                                        : 'N/A',
+                                    icon: Icons.star,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
+                ),
+                
+                // 공지사항 (있는 경우만 표시)
+                if (widget.user?.type == UserType.seller || widget.user?.type == UserType.influencer) ...<Widget>[
+                  const SizedBox(height: 16),
+                  Card(
+                    color: Colors.orange.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.campaign,
+                            color: Colors.orange.shade700,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '🎉 신규 가입 이벤트',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.orange.shade700,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '첫 협업 완료 시 수수료 50% 할인!',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colors.orange.shade700,
+                            ),
+                            onPressed: () {
+                              // TODO: 공지사항 상세로 이동
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                
+                const SizedBox(height: 24),
+                
+                // 최근 활동
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '최근 활동',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.push('/notifications');
+                      },
+                      child: const Text('더보기'),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 12),
+                
+                Consumer<DashboardProvider>(
+                  builder: (context, dashboardProvider, child) {
+                    if (widget.user == null || dashboardProvider.isLoadingRecentActivities) {
+                      return const Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(32),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      );
+                    }
+                    
+                    final activities = dashboardProvider.recentActivities ?? [];
+                    if (activities.isEmpty) {
+                      return const Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(32),
+                          child: Center(
+                            child: Text('최근 활동이 없습니다.'),
+                          ),
+                        ),
+                      );
+                    }
+                    
+                    return Card(
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: activities.take(3).length,
+                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        itemBuilder: (context, index) {
+                          final activity = activities[index];
+                          return ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: _getActivityColor(activity.type),
+                              child: Icon(
+                                _getActivityIcon(activity.type),
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(
+                              activity.title,
+                              style: const TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            subtitle: Text(
+                              activity.description,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Text(
+                              _formatActivityTime(activity.createdAt),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppTheme.grey600,
+                              ),
+                            ),
+                            onTap: () {
+                              // TODO: 확인 버튼 없이 기본 네비게이션 처리
+                              if (activity.type == 'campaign') {
+                                context.push('/campaigns');
+                              } else if (activity.type == 'match') {
+                                context.push('/auto-match');
+                              } else if (activity.type == 'review') {
+                                context.push('/review/list');
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 
                 const SizedBox(height: 24),
@@ -457,156 +713,44 @@ class _QuickMenuCard extends StatelessWidget {
   }
 }
 
-class _ContractTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.description_outlined,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            '계약 관리',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '내 계약을 확인하고 관리하세요',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () => context.push('/contracts'),
-            icon: const Icon(Icons.description),
-            label: const Text('계약 목록 보기'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// 통계 아이템 위젯
+class _StatItem extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
 
-class _ReviewTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.star_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            '리뷰 관리',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '받은 리뷰와 작성한 리뷰를 확인하세요',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: () => context.push('/review/list'),
-            icon: const Icon(Icons.star),
-            label: const Text('리뷰 목록 보기'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ChatTab extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.chat_bubble_outline,
-            size: 64,
-            color: Colors.grey[300],
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            '채팅',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '인플루언서와 실시간으로 소통하세요',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () {
-              context.push('/chat');
-            },
-            icon: const Icon(Icons.chat),
-            label: const Text('채팅 목록 보기'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProfileTab extends StatelessWidget {
-  final User? user;
-
-  const _ProfileTab({this.user});
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-        onPressed: () {
-          context.push('/profile');
-        },
-        child: const Text('프로필 설정하기'),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: AppTheme.primaryColor,
+          size: 28,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: AppTheme.grey600,
+          ),
+        ),
+      ],
     );
   }
 }

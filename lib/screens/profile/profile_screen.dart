@@ -521,6 +521,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
               const SizedBox(height: 32),
+
+              // 설정 메뉴
+              _SectionTitle(title: '설정'),
+              const SizedBox(height: 16),
+              
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.security),
+                      title: const Text('보안 설정'),
+                      subtitle: const Text('비밀번호, 2차 인증, 개인정보 보호'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        context.push('/security-settings');
+                      },
+                    ),
+                    const Divider(height: 1),
+                    ListTile(
+                      leading: const Icon(Icons.notifications),
+                      title: const Text('알림 설정'),
+                      subtitle: const Text('푸시 알림, 이메일 알림 설정'),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        // TODO: 알림 설정 화면
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('알림 설정 기능은 곧 추가됩니다.'),
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              // 관리자 메뉴 (관리자인 경우만 표시)
+              if (user?.email == 'admin@sellerseller.com') ...[
+                const SizedBox(height: 16),
+                Card(
+                  color: Colors.orange.shade50,
+                  child: ListTile(
+                    leading: const Icon(Icons.admin_panel_settings, color: Colors.orange),
+                    title: const Text('관리자 대시보드', style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                    subtitle: const Text('사용자, 캐페인, 신고 관리'),
+                    trailing: const Icon(Icons.chevron_right, color: Colors.orange),
+                    onTap: () {
+                      context.push('/admin');
+                    },
+                  ),
+                ),
+              ],
+
+              const SizedBox(height: 32),
             ],
           ),
         ),
