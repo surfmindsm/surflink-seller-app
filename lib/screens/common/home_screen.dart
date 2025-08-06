@@ -50,81 +50,68 @@ class _HomeScreenState extends State<HomeScreen> {
       _ProfileTab(user: user),
     ];
 
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Row(
-            children: [
-              const Icon(
-                Icons.connect_without_contact,
-                color: AppTheme.primaryColor,
-              ),
-              const SizedBox(width: 8),
-              const Text('셀러셀러'),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () {
-                  context.push('/search?targetType=campaign');
-                },
-              ),
-              Consumer<NotificationProvider>(
-                builder: (context, notificationProvider, child) {
-                  return Stack(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined),
-                        onPressed: () {
-                          context.push('/notifications');
-                        },
-                      ),
-                      if (notificationProvider.unreadCount > 0)
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
+    return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Icon(
+              Icons.connect_without_contact,
+              color: AppTheme.primaryColor,
+            ),
+            const SizedBox(width: 8),
+            const Text('셀러셀러'),
+            const Spacer(),
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                context.push('/search?targetType=campaign');
+              },
+            ),
+            Consumer<NotificationProvider>(
+              builder: (context, notificationProvider, child) {
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications_outlined),
+                      onPressed: () {
+                        context.push('/notifications');
+                      },
+                    ),
+                    if (notificationProvider.unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '${notificationProvider.unreadCount}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            child: Text(
-                              '${notificationProvider.unreadCount}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                    ],
-                  );
-                },
-              ),
-            ],
-          ),
-          automaticallyImplyLeading: false,
-          bottom: TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.home), text: '홈'),
-              Tab(icon: Icon(Icons.description), text: '계약'),
-              Tab(icon: Icon(Icons.star), text: '리뷰'),
-              Tab(icon: Icon(Icons.chat), text: '채팅'),
-              Tab(icon: Icon(Icons.person), text: '프로필'),
-            ],
-          ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
-        body: TabBarView(
-          children: pages,
-        ),
-        bottomNavigationBar: BottomNavigationBar(
+        automaticallyImplyLeading: false,
+      ),
+      body: pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           type: BottomNavigationBarType.fixed,
@@ -158,7 +145,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }
